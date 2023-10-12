@@ -1,0 +1,46 @@
+paths:
+  /dashboard:
+    get:
+        tags:
+          - user
+        summary: user dashboard
+        security:
+          - BearerAuth: []
+        produces:
+          - application/json
+        parameters:
+        - in: query
+          name: limit
+          type: integer
+          required: true
+        - in: query
+          name: offset
+          type: integer
+          required: true  
+        responses:
+          '200':
+            description: OK
+  /schemesummary:
+    get:
+        tags:
+          - user
+        summary: User Scheme Summary (Dashboard Fetch Needed)
+        security:
+          - BearerAuth: []
+        produces:
+          - application/json
+        parameters:
+          - name: fund
+            in: header
+            type: string
+            format: string
+            required: true
+          - name: scheme
+            in: header
+            type: string
+            format: string
+            required: true
+        responses:
+          '200':
+            description: OK
+
