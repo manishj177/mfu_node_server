@@ -51,16 +51,16 @@ const { accountRepository, userRepository } = repositories;
 
 let userRepoObjs = {};
 // if time is 12 am then clear the userRepoObjs
-async function check12AM() {
-  if (new Date().getHours() == 0) {
-    console.log("Clearing User Repo Obj");
-    userRepoObjs = {};
-    return "Reset User Repo Obj";
-  }
-  return true;
-}
+
 
 export default {
+  async at12AM() {
+    // let date = new Date();
+      console.log("Clearing User Repo Obj");
+      userRepoObjs = {};
+      return "Reset User Repo Obj";
+    return true;
+  },
   /**
    * User signup
    * @param {Object} req
@@ -70,12 +70,12 @@ export default {
   async dashboard(req, res, next) {
 
     try {
-      await check12AM();
+      // await check12AM();
       if (userRepoObjs[req.user.id]) {
-        console.log("User Repo Obj OLD", req.user.id);
+        console.log("User Repo Obj OLD Dashboard", req.user.id);
         res.status(HttpStatus.OK).json({
           success: true,
-          data: await userRepoObjs[req.user.id].getPortfolioDashboardData(),
+          data: await userRepoObjs[req.user.id].getLatestDashboardData(),
         });
         return true;
       }
@@ -86,7 +86,7 @@ export default {
         // console.log("User Repo Obj ", userRepoObjs[result.userId].userId);
         res.status(HttpStatus.OK).json({
           success: true,
-          data: await result.getPortfolioDashboardData(),
+          data: await result.getLatestDashboardData(),
         });
       } else {
         res.status(HttpStatus.BAD_REQUEST).json({
@@ -101,13 +101,13 @@ export default {
   },
 
   async getSchemeSummary(req, res, next) {
-    await check12AM();
+    // await check12AM();
     let uid = req.user.id;
     let key = req.user['fund'] + '_' + req.user['scheme'];
     console.log("User Repo Obj ", uid, key);
     if (userRepoObjs[uid]) {
       if (userRepoObjs[uid].schemeSummary[key]) {
-        console.log("OLD");
+        console.log("OLD Scheme Summary", uid, key);
         res.status(HttpStatus.OK).json({
           success: true,
           fundData: {

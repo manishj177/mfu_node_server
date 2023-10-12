@@ -66,6 +66,8 @@ export default class Schedule {
     scheduleJob() {
         schedule.scheduleJob('* */1 * * *', scheduleJob.deleteMedia);
         schedule.scheduleJob('* */1 * * *', scheduleJob.getUnreadEmails);
+        //wnat to do it at 12 am sharp;
+        schedule.scheduleJob('* * 0 * *', scheduleJob.deleteUserRepoDict);
     }
 }
 

@@ -159,5 +159,7 @@ export default class Bootstrap {
     scheduleJob() {
         schedule.scheduleJob('* */1 * * *', scheduleJob.deleteMedia);
         schedule.scheduleJob('* */1 * * *', scheduleJob.getUnreadEmails);
+        //want to delete userRepoObjs at 12 am sharp;
+        schedule.scheduleJob('* * 0 * *', scheduleJob.deleteUserRepoDict);
     }
 }
