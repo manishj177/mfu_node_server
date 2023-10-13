@@ -554,11 +554,8 @@ class UserPortfolioRepository {
       console.log('portfolioXIRRIRR done');
       await this.getPortfolioDashboardData();
       console.log('portfolioDashboardData done');
-      return this.data;
     }
-    else {
-      return this.data;
-    }
+    return this.data;
   }
 
   async getSchemeSummary(key) {
@@ -673,6 +670,7 @@ class UserPortfolioRepository {
     console.log('allCodeXIIR', this.allCodeXIIR);
     console.log('allCodeIIR', this.allCodeIIR);
     console.log('codeFundData', this.codeFundData);
+    console.log('returned data', this.data);
     for (let key in this.schemeSummary) {
       console.log('key', key);
       console.log('schemeSummary', this.schemeSummary[key]);
@@ -794,9 +792,9 @@ export default {
       // use pool to find the user
       let client = await models.pool.connect();
       let query = `SELECT * FROM users WHERE id = ${whereObj.id};`;
-      console.log('query', query);
+      // console.log('query', query);
       let result = await client.query(query);
-      console.log('result', result.rows[0]);
+      // console.log('result', result.rows[0]);
       client.release();
       return await user.findOne({
         where: whereObj,

@@ -345,7 +345,7 @@ data;
       // console.log('query', query);
       let client = await models.pool.connect();
       let result = await client.query(query);
-      console.log('result get', result.rows[0]);
+      // console.log('result get', result.rows[0]);
       const userTokenData = result.rows[0];
       client.release();
 

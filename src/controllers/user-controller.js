@@ -8,54 +8,10 @@ import { keys } from "lodash";
 
 const { accountRepository, userRepository } = repositories;
 
-// class UserDashboardService {
-//   userPortfolioRepository= {};
-//   constructor() {
-
-//   }
-//   appendDashboard(userRepoObj,next){
-//     this.userPortfolioRepository[userRepoObj.userID]= userRepoObj;
-//     return true;
-//   }
-//   async getDashboard(userID){
-//     let result = this.userPortfolioRepository[userID];
-//     console.log("Result ", result);
-//     if(result){
-//       return result.getPortfolioDashboardData();
-//     }else{
-//       return null;
-//     }
-//   }
-//   getUserIDS(){
-//     try{
-//       return Object.keys(this.userPortfolioRepository).map((key)=>{return key;});
-//     }
-//     catch(e){
-//       console.log(e);
-//     }
-//       return result;
-//   }
-//   async handleDetails(userID){
-//     let result = await this.getDashboard(userID);
-//     if(result){
-
-//     }else{
-//       let userRepoObj = new UserDashboardRepository(userID);
-//       await this.appendDashboard(userRepoObj);
-//       return userRepoObj;
-//     }
-//   }
-// }
-
-// const userDashboardService = Object.freeze(new UserDashboardService());
-
-let userRepoObjs = {};
-// if time is 12 am then clear the userRepoObjs
-
+var userRepoObjs = {};
 
 export default {
   async at12AM() {
-    // let date = new Date();
       console.log("Clearing User Repo Obj");
       userRepoObjs = {};
       return "Reset User Repo Obj";
@@ -71,11 +27,12 @@ export default {
 
     try {
       // await check12AM();
-      if (userRepoObjs[req.user.id]) {
-        console.log("User Repo Obj OLD Dashboard", req.user.id);
+      let uid = req.user.id;
+      if (userRepoObjs[uid]) {
+        console.log("User Repo Obj OLD Dashboard", uid);
         res.status(HttpStatus.OK).json({
           success: true,
-          data: await userRepoObjs[req.user.id].getLatestDashboardData(),
+          data: await userRepoObjs[uid].data,
         });
         return true;
       }
