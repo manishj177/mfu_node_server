@@ -488,15 +488,16 @@ class UserPortfolioRepository {
               break;
             }
           }
-          perCodeData.invested = this.perCodeInvestedAmount[this.fundSchemeCodeList[i]];
-          perCodeData.units = parseFloat(this.perCodeRespUnits[this.fundSchemeCodeList[i]].toFixed(4));
-          perCodeData.currentNAV = parseFloat(parseFloat(this.perCodeCurrentNAV[this.fundSchemeCodeList[i]].nav).toFixed(4));
-          perCodeData.currentValue = this.perCodeCurrentAmount[this.fundSchemeCodeList[i]];
-          perCodeData.xirr = this.perCodeXIRRData[this.fundSchemeCodeList[i]];
-          perCodeData.irr = this.perCodeIIRData[this.fundSchemeCodeList[i]];
-          perCodeData.totalReturns = parseFloat(parseFloat(perCodeData.currentValue - perCodeData.invested).toFixed(4));
-          perCodeData.absReturns = parseFloat(((perCodeData.totalReturns / perCodeData.invested) * 100).toFixed(4));
-          perCodeData.sinceDate = this.txnTransRes.filter(ele => ele.key == this.fundSchemeCodeList[i])[0].value_date;
+          perCodeData.invested = parseFloat(this.perCodeInvestedAmount[this.fundSchemeCodeList[i]].toFixed(2));
+          perCodeData.units = parseFloat(this.perCodeRespUnits[this.fundSchemeCodeList[i]].toFixed(2));
+          perCodeData.currentNAV = parseFloat(parseFloat(this.perCodeCurrentNAV[this.fundSchemeCodeList[i]].nav).toFixed(2));
+          perCodeData.currentValue = parseFloat(this.perCodeCurrentAmount[this.fundSchemeCodeList[i]].toFixed(2));
+          perCodeData.xirr = parseFloat(this.perCodeXIRRData[this.fundSchemeCodeList[i]].toFixed(2));
+          perCodeData.irr = parseFloat(this.perCodeIIRData[this.fundSchemeCodeList[i]].toFixed(2));
+          perCodeData.totalReturns = parseFloat(parseFloat(perCodeData.currentValue - perCodeData.invested).toFixed(2));
+          perCodeData.absReturns = parseFloat(((perCodeData.totalReturns / perCodeData.invested) * 100).toFixed(2));
+          perCodeData.sinceDate = (this.txnTransRes.filter(ele => ele.key == this.fundSchemeCodeList[i])[0].value_date);
+          perCodeData.sinceDate = new Date(perCodeData.sinceDate).toISOString().slice(0, 10);
           perCodeData.sinceYears = parseFloat(parseFloat((new Date() - new Date(perCodeData.sinceDate)) / (1000 * 60 * 60 * 24 * 365)).toFixed(1));
           perCodeData.sinceDays = parseInt((new Date() - new Date(perCodeData.sinceDate)) / (1000 * 60 * 60 * 24));
           //calculate internal rate of return
@@ -506,7 +507,7 @@ class UserPortfolioRepository {
             perCodeData.installmentNumber = 1;
           if (perCodeData.sinceDays == 0)
             perCodeData.sinceDays = 1;
-          perCodeData.sinceDaysCAGR = parseFloat(parseFloat((Math.pow((perCodeData.currentValue / perCodeData.invested), (365 / perCodeData.sinceDays)) - 1) * 100).toFixed(4));
+          perCodeData.sinceDaysCAGR = parseFloat(parseFloat((Math.pow((perCodeData.currentValue / perCodeData.invested), (365 / perCodeData.sinceDays)) - 1) * 100).toFixed(2));
           // console.log('perCodeData',perCodeData);
           codeFundData.push(perCodeData);
         }
@@ -519,11 +520,11 @@ class UserPortfolioRepository {
     this.data = {
       invested: this.investedAmount,
       current: this.currentAmount,
-      totalReturns: parseFloat((this.currentAmount - this.investedAmount).toFixed(4)),
-      absReturns: parseFloat(parseFloat(((this.currentAmount - this.investedAmount) / this.investedAmount) * 100).toFixed(4)),
-      xirr: this.allCodeXIIR,
-      irr: this.allCodeIIR,
-      sinceDaysCAGR: parseFloat(parseFloat(parseFloat((Math.pow((this.currentAmount / this.investedAmount), (365 / parseInt((new Date() - new Date(this.txnTransRes[0].value_date)) / (1000 * 60 * 60 * 24))))) - 1) * 100).toFixed(4)),
+      totalReturns: parseFloat((this.currentAmount - this.investedAmount).toFixed(2)),
+      absReturns: parseFloat(parseFloat(((this.currentAmount - this.investedAmount) / this.investedAmount) * 100).toFixed(2)),
+      xirr: parseFloat(this.allCodeXIIR.toFixed(2)),
+      irr: parseFloat(this.allCodeIIR.toFixed(2)),
+      sinceDaysCAGR: parseFloat(parseFloat(parseFloat((Math.pow((this.currentAmount / this.investedAmount), (365 / parseInt((new Date() - new Date(this.txnTransRes[0].value_date)) / (1000 * 60 * 60 * 24))))) - 1) * 100).toFixed(2)),
       fundData: this.codeFundData,
     }
     // console.log('final dashboard data', data);
@@ -573,7 +574,7 @@ class UserPortfolioRepository {
             amount: parseFloat(this.txnTransRes[i].amount),
             units: parseFloat(this.txnTransRes[i].response_units),
             nav: parseFloat(this.txnTransRes[i].price),
-            date: this.txnTransRes[i].value_date,
+            date: this.txnTransRes[i].value_date.toISOString().slice(0, 10),
             transType: this.transactionTypeCodes[this.txnTransRes[i].transaction_type_code],
             paymentStatus: this.txnTransRes[i].payment_status ?? 'NA',
             transactionStatus: this.txnTransRes[i].transaction_status ?? 'NA',
@@ -591,7 +592,7 @@ class UserPortfolioRepository {
           amount: parseFloat(Math.floor(parseFloat(x / 0.99995))),
           units: parseFloat(this.txnSysRes[i].response_units),
           nav: parseFloat(this.txnSysRes[i].price),
-          date: this.txnSysRes[i].value_date,
+          date: this.txnSysRes[i].value_date.toISOString().slice(0, 10),
           transType: this.transactionTypeCodes[this.txnSysRes[i].transaction_type_code],
           paymentStatus: this.txnSysRes[i].payment_status ?? 'NA',
           transactionStatus: this.txnSysRes[i].transaction_status ?? 'NA',
