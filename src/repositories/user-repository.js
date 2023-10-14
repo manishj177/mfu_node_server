@@ -8,7 +8,7 @@ import { intersection, sum } from "lodash";
 import { push } from "joi/lib/ref";
 import x from "uniqid";
 import https from "https";
-import xirr from "xirr";
+var xirr = require('xirr');
 import { irr } from "node-irr";
 // import "../helpers/commonHelper.js";
 //want to import function from commonHelper.js
@@ -135,6 +135,7 @@ const matchSchemes = {
 
 class UserPortfolioRepository {
   userId;
+  previous;
   userData = {};
   userCanData = {};
   txnTransRes = [];
@@ -181,8 +182,7 @@ class UserPortfolioRepository {
     // console.log('UserPortfolioRepository constructor');
     // how to make private variable
     this.userId = uid;
-    // let date = new Date();
-    // this.previous = date.toISOString().slice(0, 10);
+    this.previous = new Date();
     console.log('userId', this.userId);
   }
 
@@ -373,15 +373,12 @@ class UserPortfolioRepository {
   async getPerCodeTransactionsForXIRRIRR() {
     for (let key in this.perCodeCurrentAmount) {
       this.perCodeTransactionsForXIRR[key] = this.txnTransRes.filter(ele => ele.key == key && ele.amount > 0 && ele.transaction_type_code != 'R').map(ele => { return { amount: -parseFloat(Math.ceil(parseFloat(ele.amount))), when: new Date(ele.value_date) } });
+      this.perCodeTransactionsForXIRR[key] = this.perCodeTransactionsForXIRR[key].concat(this.txnTransRes.filter(ele => ele.key == key && ele.amount > 0 && ele.transaction_type_code == 'R').map(ele => { return { amount: +parseFloat(Math.ceil(parseFloat(ele.amount))), when: new Date(ele.value_date) } }));
+
       this.perCodeTransactionsForXIRR[key] = this.perCodeTransactionsForXIRR[key].concat(this.txnSysRes.filter(ele => ele.key == key).map(ele => { return { amount: -parseFloat(Math.ceil(parseFloat(ele.response_amount) + parseFloat(ele.response_amount) * 0.00005)), when: new Date(ele.value_date) } }));
-      // want to add all the amount which has transaction type code 'R' with sign +
-      for (let i = 0; i < this.txnTransRes.length; i++) {
-        if (this.txnTransRes[i].transaction_type_code == 'R' && this.txnTransRes[i].key == key) {
-          this.perCodeTransactionsForXIRR[key].push({ amount: parseFloat(this.txnTransRes[i].response_amount), when: new Date(this.txnTransRes[i].value_date) });
-        }
-      }
+      // want to add all the amount which has transaction type code 'R' with sign 
       this.allCodeDataForXIRR = this.allCodeDataForXIRR.concat(this.perCodeTransactionsForXIRR[key]);
-      this.perCodeTransactionsForXIRR[key].push({ amount: this.perCodeCurrentAmount[key], when: new Date(this.perCodeCurrentNAV[key].date) });
+      this.perCodeTransactionsForXIRR[key].push({ amount: this.perCodeCurrentAmount[key], when: this.previous });
       this.perCodeTransactionsForIRR[key] = this.perCodeTransactionsForXIRR[key].map(ele => { return parseFloat(Math.ceil(parseFloat(ele.amount))) });
     }
     this.allCodeDataForXIRR.sort((a, b) => new Date(a.when) - new Date(b.when));
@@ -399,13 +396,16 @@ class UserPortfolioRepository {
     for (let Code in this.perCodeTransactionsForXIRR) {
       if (this.perCodeTransactionsForXIRR[Code].length >= 2) {
         try {
+          console.log('try ',Code, this.perCodeTransactionsForXIRR[Code]);
           this.perCodeXIRRData[Code] = parseFloat((xirr(this.perCodeTransactionsForXIRR[Code]) * 100).toFixed(4));
         }
         catch (e) {
-          this.perCodeXIRRData[Code] = 0;
+          console.log('e ',Code, e);
+          this.perCodeXIRRData[Code] = -1;
         }
       }
       else {
+        console.log('else ',Code);
         this.perCodeXIRRData[Code] = 0;
       }
     }
@@ -693,7 +693,7 @@ export default {
       var userRepo = new UserPortfolioRepository(userId);
       await userRepo.getLatestDashboardData();
       console.log('latest dashboard data done');
-      await userRepo.peekAllData();
+      // await userRepo.peekAllData();
       return userRepo;
     }
     catch (error) {
