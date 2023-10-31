@@ -40,7 +40,7 @@ export default {
       console.log("New ", result.userId);
       if (!(typeof result === 'UserPortfolioRepository')) {
         userRepoObjs[result.userId] = result;
-        // console.log("User Repo Obj ", userRepoObjs[result.userId].userId);
+        // // console.log("User Repo Obj ", userRepoObjs[result.userId].userId);
         res.status(HttpStatus.OK).json({
           success: true,
           data: await result.getLatestDashboardData(),
@@ -52,7 +52,7 @@ export default {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       next(error);
     }
   },
@@ -74,9 +74,9 @@ export default {
         });
         return true;
       }
-      else if (userRepoObjs[uid].schemeSummary[key] == null) {
+      else{
         let data = await userRepoObjs[uid].getSchemeSummary(key);
-        console.log("NEW");
+        console.log("NEW Scheme Summary for ", uid, key);
         data==true ? res.status(HttpStatus.OK).json({
           success: true,
           fundData: {
@@ -90,33 +90,33 @@ export default {
           });
         return true;
       }
-      else {
-        let result = await userRepository.dashboard(req);
-        console.log("New in schemesummary", result.userId);
-        if (!(typeof result === 'UserPortfolioRepository')) {
-          userRepoObjs[result.userId] = result;
-          let data = await userRepoObjs[result.userId].getSchemeSummary(key);
-          // console.log("User Repo Obj ", userRepoObjs[result.userId].userId);
-          data==true?res.status(HttpStatus.OK).json({
-            success: true,
-          fundData: {
-            length: userRepoObjs[uid].schemeSummary[key].length,
-            data: userRepoObjs[uid].schemeSummary[key]
-          }
-          }):
-          res.status(HttpStatus.BAD_REQUEST).json({
-            success: false,
-            data: "Go back and try again",
-          });
-        } else {
-          res.status(HttpStatus.BAD_REQUEST).json({
-            success: false,
-            data: "Go back and try again",
-          });
+    }
+    else {
+      let result = await userRepository.dashboard(req);
+      console.log( result.userId , "New in schemesummary for scheme ", key );
+      if (!(typeof result === 'UserPortfolioRepository')) {
+        userRepoObjs[result.userId] = result;
+        let data = await userRepoObjs[result.userId].getSchemeSummary(key);
+        // // console.log("User Repo Obj ", userRepoObjs[result.userId].userId);
+        data==true?res.status(HttpStatus.OK).json({
+          success: true,
+        fundData: {
+          length: userRepoObjs[uid].schemeSummary[key].length,
+          data: userRepoObjs[uid].schemeSummary[key]
         }
-
-        return true;
+        }):
+        res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          data: "Go back and try again",
+        });
+      } else {
+        res.status(HttpStatus.BAD_REQUEST).json({
+          success: false,
+          data: "Go back and try again",
+        });
       }
+
+      return true;
     }
   }
 };

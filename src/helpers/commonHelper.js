@@ -131,7 +131,7 @@ export default {
                 },
             };
             const response = await axios(config);
-            // console.log(response.data.data[0]['nav']);
+            // // console.log(response.data.data[0]['nav']);
             return await response.data.data[0];
         } catch (error) {
             return [];

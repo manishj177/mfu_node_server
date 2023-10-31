@@ -179,11 +179,11 @@ class UserPortfolioRepository {
   data = {};
 
   constructor(uid) {
-    // console.log('UserPortfolioRepository constructor');
+    // // console.log('UserPortfolioRepository constructor');
     // how to make private variable
     this.userId = uid;
     this.previous = new Date();
-    console.log('userId', this.userId);
+    // console.log('userId', this.userId);
   }
 
   async getUIDData() {
@@ -197,25 +197,25 @@ class UserPortfolioRepository {
 
   async getUserCanData(panCard) {
     let query = `select * from user_can_registrations where first_holder_pan ilike '%${panCard}%';`;
-    // console.log('query', query);
+    // // console.log('query', query);
     let client = await models.pool.connect();
     let results = await client.query(query);
     client.release();
     this.userCanData = results.rows[0];
-    // console.log('userCanData', this.userCanData);
+    // // console.log('userCanData', this.userCanData);
     return this.userCanData;
   }
 
   async getTxnData() {
     let query = `select * from txn_response_transaction_rsps where can_number = '${this.userCanData.can}' and utrn != '0' and transaction_status in ('OA', 'RA', 'RP') and transaction_type_code in ('A', 'B', 'N', 'V', 'J', 'R', 'C') and response_amount>0 order by value_date asc;`;
-    // console.log('query', query);
+    // // console.log('query', query);
     let client = await models.pool.connect();
     let results = await client.query(query);
-    // console.log('results', results.rowCount);
-    // console.log('results', results.rows);
+    // // console.log('results', results.rowCount);
+    // // console.log('results', results.rows);
     // client.release();
     this.txnTransRes = results.rows;
-    // console.log('txnTransRes', this.txnTransRes);
+    // // console.log('txnTransRes', this.txnTransRes);
     this.fundSchemeCodeList = [];
     let idsToRemove = [];
     for (let i = 0; i < this.txnTransRes.length; i++) {
@@ -238,7 +238,7 @@ class UserPortfolioRepository {
         this.fundSchemeCodeList.push(this.txnTransRes[i].key);
       }
     }
-    console.log('idsToRemove', idsToRemove);
+    // console.log('idsToRemove', idsToRemove);
     for (let i = 0; i < idsToRemove.length; i++) {
       this.txnTransRes = this.txnTransRes.filter(function (obj) {
         return obj.id !== idsToRemove[i];
@@ -251,16 +251,16 @@ class UserPortfolioRepository {
         this.folioNumbers.push(this.txnTransRes[i].folio_number);
       }
     }
-    console.log('folioNumbers', this.folioNumbers);
+    // console.log('folioNumbers', this.folioNumbers);
 
-    // console.log('fundschemeCode', this.fundSchemeCodeList);
+    // // console.log('fundschemeCode', this.fundSchemeCodeList);
 
     query = `select * from txn_response_systematic_rsps where user_id = ${this.userId} and utrn != '0' and transaction_status in ('OA', 'RA', 'RP') and transaction_type_code in ('A', 'B', 'N', 'V', 'J', 'R', 'C') and response_amount>0 order by value_date asc;`;
-    // console.log('query', query);
+    // // console.log('query', query);
     client = await models.pool.connect();
     results = await client.query(query);
-    // console.log('results', results.rowCount);
-    // console.log('results', results.rows);
+    // // console.log('results', results.rowCount);
+    // // console.log('results', results.rows);
     client.release();
     this.txnSysRes = results.rows;
     for (let i = 0; i < this.txnSysRes.length; i++) {
@@ -280,8 +280,8 @@ class UserPortfolioRepository {
       }
     });
 
-    // console.log('Rs',rs);
-    // console.log('txnSysRes',this.txnSysRes);
+    // // console.log('Rs',rs);
+    // // console.log('txnSysRes',this.txnSysRes);
     return 0;
   }
 
@@ -298,20 +298,20 @@ class UserPortfolioRepository {
       let x = parseFloat(this.txnSysRes[i].response_amount);
       this.perCodeInvestedAmount[this.txnSysRes[i].key] = this.perCodeInvestedAmount[this.txnSysRes[i].key] ? this.perCodeInvestedAmount[this.txnSysRes[i].key] + parseFloat(Math.floor(x / 0.99995)) : parseFloat(Math.floor(x / 0.99995));
     }
-    // console.log('perCodeInvestedAmount',this.perCodeInvestedAmount);
+    // // console.log('perCodeInvestedAmount',this.perCodeInvestedAmount);
     for (let i = 0; i < this.txnTransRes.length; i++) {
       if (this.txnTransRes[i].transaction_type_code == 'R') {
-        // console.log('this.txnTransRes[i].key', this.txnTransRes[i].response_amount);
+        // // console.log('this.txnTransRes[i].key', this.txnTransRes[i].response_amount);
         this.perCodeInvestedAmount[this.txnTransRes[i].key] = this.perCodeInvestedAmount[this.txnTransRes[i].key] - parseFloat(this.txnTransRes[i].response_amount);
       }
     }
-    // console.log('perCodeInvestedAmount', this.perCodeInvestedAmount);
+    // // console.log('perCodeInvestedAmount', this.perCodeInvestedAmount);
     return 0;
   }
 
   async getTotalInvested() {
     this.investedAmount = sum(Object.values(this.perCodeInvestedAmount));
-    // console.log('investedAmount', this.investedAmount);
+    // // console.log('investedAmount', this.investedAmount);
   }
 
   async getPerCodeCurrent() {
@@ -321,13 +321,13 @@ class UserPortfolioRepository {
         let key = this.txnTransRes[j].key;
         if (this.fundSchemeCodeList[i] == key) {
           this.perCodeRespUnits[key] = this.perCodeRespUnits[key] ? this.perCodeRespUnits[key] + parseFloat(this.txnTransRes[j].response_units) : parseFloat(this.txnTransRes[j].response_units);
-          // console.log('this.txnTransRes[j].responseUnits', this.txnTransRes[j].response_units);
+          // // console.log('this.txnTransRes[j].responseUnits', this.txnTransRes[j].response_units);
         }
         if (this.txnTransRes[j].transaction_type_code == 'R') {
           this.perCodeRespUnits[key] = this.perCodeRespUnits[key] - parseFloat(this.txnTransRes[j].response_units);
         }
       }
-      // console.log('perCodeRespUnits', this.perCodeRespUnits);
+      // // console.log('perCodeRespUnits', this.perCodeRespUnits);
 
       for (let j = 0; j < this.txnSysRes.length; j++) {
         let key = this.txnSysRes[j].key;
@@ -344,29 +344,29 @@ class UserPortfolioRepository {
       }
 
     }
-    // console.log('perCodeSchemeNames', this.perCodeSchemeNames);
-    //   console.log('perCodeRespUnits', this.perCodeRespUnits);
-    //   console.log('perCodeCurrentNAV', this.perCodeCurrentNAV);
-    //   console.log('perCodeCurrentAmount', this.perCodeCurrentAmount);
+    // // console.log('perCodeSchemeNames', this.perCodeSchemeNames);
+    //   // console.log('perCodeRespUnits', this.perCodeRespUnits);
+    //   // console.log('perCodeCurrentNAV', this.perCodeCurrentNAV);
+    //   // console.log('perCodeCurrentAmount', this.perCodeCurrentAmount);
 
 
     for (let key in this.perCodeSchemeNames) {
       let code = matchSchemes[this.perCodeSchemeNames[key]][1];
-      // console.log('code', code);
+      // // console.log('code', code);
       this.perCodeCurrentNAV[key] = await commonHelper.getNavByCode(code);
       this.perCodeCurrentAmount[key] = parseFloat((this.perCodeRespUnits[key] * parseFloat(this.perCodeCurrentNAV[key].nav)).toFixed(4));
     }
-    // console.log('perCodeSchemeNames', this.perCodeSchemeNames);
-    // console.log('perCodeRespUnits', this.perCodeRespUnits);
-    // console.log('perCodeCurrentNAV', this.perCodeCurrentNAV);
-    // console.log('perCodeCurrentAmount', this.perCodeCurrentAmount);
+    // // console.log('perCodeSchemeNames', this.perCodeSchemeNames);
+    // // console.log('perCodeRespUnits', this.perCodeRespUnits);
+    // // console.log('perCodeCurrentNAV', this.perCodeCurrentNAV);
+    // // console.log('perCodeCurrentAmount', this.perCodeCurrentAmount);
     return 0;
   }
 
   async getTotalCurrent() {
     this.currentAmount = sum(Object.values(this.perCodeCurrentAmount));
     this.currentAmount = parseFloat(this.currentAmount.toFixed(4));
-    // console.log('currentAmount', this.currentAmount);
+    // // console.log('currentAmount', this.currentAmount);
     return 0;
   }
 
@@ -384,10 +384,10 @@ class UserPortfolioRepository {
     this.allCodeDataForXIRR.sort((a, b) => new Date(a.when) - new Date(b.when));
     this.allCodeDataForIRR = this.allCodeDataForXIRR.map(ele => { return parseFloat(ele.amount) });
 
-    // console.log('allCodeDataForXIRR', this.allCodeDataForXIRR);
-    // console.log('allCodeDataForIRR', this.allCodeDataForIRR);
-    // console.log('perCodeTransactionsForXIRR', this.perCodeTransactionsForXIRR);
-    // console.log('perCodeTransactionsForIRR', this.perCodeTransactionsForIRR);
+    // // console.log('allCodeDataForXIRR', this.allCodeDataForXIRR);
+    // // console.log('allCodeDataForIRR', this.allCodeDataForIRR);
+    // // console.log('perCodeTransactionsForXIRR', this.perCodeTransactionsForXIRR);
+    // // console.log('perCodeTransactionsForIRR', this.perCodeTransactionsForIRR);
     return 0;
   }
 
@@ -396,20 +396,20 @@ class UserPortfolioRepository {
     for (let Code in this.perCodeTransactionsForXIRR) {
       if (this.perCodeTransactionsForXIRR[Code].length >= 2) {
         try {
-          console.log('try ',Code, this.perCodeTransactionsForXIRR[Code]);
+          // console.log('try ',Code, this.perCodeTransactionsForXIRR[Code]);
           this.perCodeXIRRData[Code] = parseFloat((xirr(this.perCodeTransactionsForXIRR[Code]) * 100).toFixed(4));
         }
         catch (e) {
-          console.log('e ',Code, e);
+          // console.log('e ',Code, e);
           this.perCodeXIRRData[Code] = -1;
         }
       }
       else {
-        console.log('else ',Code);
+        // console.log('else ',Code);
         this.perCodeXIRRData[Code] = 0;
       }
     }
-    // console.log('perCodeXIRRData', this.perCodeXIRRData);
+    // // console.log('perCodeXIRRData', this.perCodeXIRRData);
 
     this.perCodeIIRData = {};
     for (let Code in this.perCodeTransactionsForIRR) {
@@ -425,13 +425,13 @@ class UserPortfolioRepository {
         this.perCodeIIRData[Code] = 0;
       }
     }
-    // console.log('perCodeIIRData', this.perCodeIIRData);
+    // // console.log('perCodeIIRData', this.perCodeIIRData);
   }
 
   async getPortfolioXIRRIRR() {
 
     this.allCodeDataForXIRR.push({ amount: this.currentAmount, when: new Date() });
-    // console.log('allCodeDataForXIRR', this.allCodeDataForXIRR);
+    // // console.log('allCodeDataForXIRR', this.allCodeDataForXIRR);
     if (this.allCodeDataForXIRR.length >= 2) {
       try {
         this.allCodeXIIR = parseFloat((xirr(this.allCodeDataForXIRR) * 100).toFixed(4));
@@ -441,10 +441,10 @@ class UserPortfolioRepository {
     } else {
       this.allCodeXIIR = 0;
     }
-    // console.log('allCodeXIIR', this.allCodeXIIR);
+    // // console.log('allCodeXIIR', this.allCodeXIIR);
 
     this.allCodeDataForIRR.push(this.currentAmount);
-    // console.log('allCodeDataForIRR', this.allCodeDataForIRR);
+    // // console.log('allCodeDataForIRR', this.allCodeDataForIRR);
     if (this.allCodeDataForIRR.length >= 2) {
       try {
         this.allCodeIIR = parseFloat((irr(this.allCodeDataForIRR) * 100).toFixed(4));
@@ -454,7 +454,7 @@ class UserPortfolioRepository {
     } else {
       this.allCodeIIR = 0;
     }
-    // console.log('allCodeIIR', this.allCodeIIR);
+    // // console.log('allCodeIIR', this.allCodeIIR);
     return 0;
   }
 
@@ -465,7 +465,7 @@ class UserPortfolioRepository {
         if (!codeFundData.includes(this.fundSchemeCodeList[i])) {
           let perCodeData = {};
           let t = this.txnTransRes.filter(ele => ele.key == this.fundSchemeCodeList[i] ? ele : null).filter(ele => ele != null);
-          // console.log('t',t);
+          // // console.log('t',t);
           perCodeData.fundName = t[0].fund_name;
           perCodeData.fundCode = t[0].fund_code;
           perCodeData.schemeName = t[0].rta_scheme_name;
@@ -476,9 +476,9 @@ class UserPortfolioRepository {
               folioList.push(t[j].folio_number);
             }
           }
-          // console.log('folioList', folioList);
+          // // console.log('folioList', folioList);
           perCodeData.folioList = folioList;
-          // console.log('perCodeData.folioList',perCodeData.folioList);
+          // // console.log('perCodeData.folioList',perCodeData.folioList);
           // perCodeData.price = parseFloat(parseFloat(t[0].price).toFixed(4));
           perCodeData.sipAmount = 0;
           for (let j = 0; j < this.txnSysRes.length; j++) {
@@ -508,13 +508,13 @@ class UserPortfolioRepository {
           if (perCodeData.sinceDays == 0)
             perCodeData.sinceDays = 1;
           perCodeData.sinceDaysCAGR = parseFloat(parseFloat((Math.pow((perCodeData.currentValue / perCodeData.invested), (365 / perCodeData.sinceDays)) - 1) * 100).toFixed(2));
-          // console.log('perCodeData',perCodeData);
+          // // console.log('perCodeData',perCodeData);
           codeFundData.push(perCodeData);
         }
       }
-      // console.log('codeFundData',codeFundData);
+      // // console.log('codeFundData',codeFundData);
       codeFundData.sort((a, b) => new Date(a.sinceDate) - new Date(b.sinceDate));
-      // console.log('codeFundData',codeFundData);
+      // // console.log('codeFundData',codeFundData);
       this.codeFundData = codeFundData;
     }
     this.data = {
@@ -527,41 +527,41 @@ class UserPortfolioRepository {
       sinceDaysCAGR: parseFloat(parseFloat(parseFloat((Math.pow((this.currentAmount / this.investedAmount), (365 / parseInt((new Date() - new Date(this.txnTransRes[0].value_date)) / (1000 * 60 * 60 * 24))))) - 1) * 100).toFixed(2)),
       fundData: this.codeFundData,
     }
-    // console.log('final dashboard data', data);
+    // // console.log('final dashboard data', data);
     // return this.data;
   }
 
   async getLatestDashboardData() {
     if (this.codeFundData.length == 0 || this.data == {}) {
       let pan = await this.getUIDData();
-      console.log('userData done');
+      // console.log('userData done');
       await this.getUserCanData(pan);
-      console.log('userCanData done');
+      // console.log('userCanData done');
       await this.getTxnData();
-      console.log('txnData done');
+      // console.log('txnData done');
       await this.getPerCodeInvested();
-      console.log('perCodeInvested done');
+      // console.log('perCodeInvested done');
       await this.getTotalInvested();
-      console.log('totalInvested done');
+      // console.log('totalInvested done');
       await this.getPerCodeCurrent();
-      console.log('perCodeCurrent done');
+      // console.log('perCodeCurrent done');
       await this.getTotalCurrent();
-      console.log('totalCurrent done');
+      // console.log('totalCurrent done');
       await this.getPerCodeTransactionsForXIRRIRR();
-      console.log('perCodeTransactionsForXIRRIRR done');
+      // console.log('perCodeTransactionsForXIRRIRR done');
       await this.getPerCodeXIRRIRRData();
-      console.log('perCodeXIRRIRRData done');
+      // console.log('perCodeXIRRIRRData done');
       await this.getPortfolioXIRRIRR();
-      console.log('portfolioXIRRIRR done');
+      // console.log('portfolioXIRRIRR done');
       await this.getPortfolioDashboardData();
-      console.log('portfolioDashboardData done');
+      // console.log('portfolioDashboardData done');
     }
     return this.data;
   }
 
   async getSchemeSummary(key) {
     if (this.schemeSummary[key]) {
-      console.log('schemeSummary already calculated');
+      // console.log('schemeSummary already calculated');
       return this.schemeSummary[key];
     }
     let data = [];
@@ -645,38 +645,38 @@ class UserPortfolioRepository {
       }
     }
     this.schemeSummary[key] = data;
-    // console.log('schemeSummary', this.schemeSummary);
+    // // console.log('schemeSummary', this.schemeSummary);
     return true;
   }
 
   async peekAllData() {
-    console.log("-----------------all Data----------------")
-    console.log('userId', this.userId);
-    // console.log('txnTransRes',this.txnTransRes);
-    // console.log('txnSysRes',this.txnSysRes);
-    console.log('fundSchemeCodeList', this.fundSchemeCodeList);
-    console.log('folioNumbers', this.folioNumbers);
-    console.log('perCodeInvestedAmount', this.perCodeInvestedAmount);
-    console.log('investedAmount', this.investedAmount);
-    console.log('perCodeRespUnits', this.perCodeRespUnits);
-    console.log('perCodeCurrentNAV', this.perCodeCurrentNAV);
-    console.log('perCodeCurrentAmount', this.perCodeCurrentAmount);
-    console.log('currentAmount', this.currentAmount);
-    console.log('perCodeTransactionsForXIRR', this.perCodeTransactionsForXIRR);
-    console.log('perCodeTransactionsForIRR', this.perCodeTransactionsForIRR);
-    console.log('allCodeDataForXIRR', this.allCodeDataForXIRR);
-    console.log('allCodeDataForIRR', this.allCodeDataForIRR);
-    console.log('perCodeXIRRData', this.perCodeXIRRData);
-    console.log('perCodeIIRData', this.perCodeIIRData);
-    console.log('allCodeXIIR', this.allCodeXIIR);
-    console.log('allCodeIIR', this.allCodeIIR);
-    console.log('codeFundData', this.codeFundData);
-    console.log('returned data', this.data);
+    // console.log("-----------------all Data----------------")
+    // console.log('userId', this.userId);
+    // // console.log('txnTransRes',this.txnTransRes);
+    // // console.log('txnSysRes',this.txnSysRes);
+    // console.log('fundSchemeCodeList', this.fundSchemeCodeList);
+    // console.log('folioNumbers', this.folioNumbers);
+    // console.log('perCodeInvestedAmount', this.perCodeInvestedAmount);
+    // console.log('investedAmount', this.investedAmount);
+    // console.log('perCodeRespUnits', this.perCodeRespUnits);
+    // console.log('perCodeCurrentNAV', this.perCodeCurrentNAV);
+    // console.log('perCodeCurrentAmount', this.perCodeCurrentAmount);
+    // console.log('currentAmount', this.currentAmount);
+    // console.log('perCodeTransactionsForXIRR', this.perCodeTransactionsForXIRR);
+    // console.log('perCodeTransactionsForIRR', this.perCodeTransactionsForIRR);
+    // console.log('allCodeDataForXIRR', this.allCodeDataForXIRR);
+    // console.log('allCodeDataForIRR', this.allCodeDataForIRR);
+    // console.log('perCodeXIRRData', this.perCodeXIRRData);
+    // console.log('perCodeIIRData', this.perCodeIIRData);
+    // console.log('allCodeXIIR', this.allCodeXIIR);
+    // console.log('allCodeIIR', this.allCodeIIR);
+    // console.log('codeFundData', this.codeFundData);
+    // console.log('returned data', this.data);
     for (let key in this.schemeSummary) {
-      console.log('key', key);
-      console.log('schemeSummary', this.schemeSummary[key]);
+      // console.log('key', key);
+      // console.log('schemeSummary', this.schemeSummary[key]);
     }
-    console.log("-----------------all Data----------------")
+    // console.log("-----------------all Data----------------")
   }
 }
 
@@ -688,11 +688,11 @@ export default {
       // const { query } = req;
       // const queryData = query;
       let userId = req.user.id;
-      console.log('userId dashboard ', userId);
+      // console.log('userId dashboard ', userId);
       // let folioNumber = queryData.folioNumber;
       var userRepo = new UserPortfolioRepository(userId);
       await userRepo.getLatestDashboardData();
-      console.log('latest dashboard data done');
+      // console.log('latest dashboard data done');
       // await userRepo.peekAllData();
       return userRepo;
     }
@@ -709,7 +709,7 @@ export default {
     let userId = req.uid;
     let folioNumber = queryData.folioNumber;
     let schemeCode = queryData.schemeCode;
-    // console.log('schemes', schemeCodes.data.length);
+    // // console.log('schemes', schemeCodes.data.length);
 
     let userData = await user.findOne({
       where: { id: userId }
@@ -737,7 +737,7 @@ export default {
       }
     );
 
-    // // console.log('txnTransRes', txnTransRes);
+    // // // console.log('txnTransRes', txnTransRes);
     let amountInvestedTrans = 0;
     for (let i = 0; i < txnTransRes.length; i++) {
       amountInvestedTrans += parseFloat(txnTransRes[i].amount);
@@ -746,10 +746,10 @@ export default {
     for (let i = 0; i < txnTransRes.length; i++) {
       amountCurrentTrans += parseFloat(txnTransRes[i].response_amount);
     }
-    // // console.log('amountInvestedTrans', amountInvestedTrans.toFixed(4), '\namountCurrentTrans', amountCurrentTrans.toFixed(4));
+    // // // console.log('amountInvestedTrans', amountInvestedTrans.toFixed(4), '\namountCurrentTrans', amountCurrentTrans.toFixed(4));
 
     let folios = txnTransRes.map(ele => ele.FolioNumber);
-    // // console.log('folios', folios);
+    // // // console.log('folios', folios);
     let folioList = [];
     for (let i = 0; i < folios.length; i++) {
       if (!folioList.includes(folios[i])) {
@@ -757,7 +757,7 @@ export default {
       }
     }
 
-    // // console.log('folioList', folioList);
+    // // // console.log('folioList', folioList);
     let leadWhere2 = {};
     leadWhere2.userId = userId;
     leadWhere2.folioNumber = { [Op.notIn]: ['0', ''] };
@@ -774,7 +774,7 @@ export default {
         order: Sequelize.literal('value_date DESC')
       }
     );
-    // // console.log('txnSysRes', txnSysRes);
+    // // // console.log('txnSysRes', txnSysRes);
     let amountInvestedSys = 0;
     let x = 0;
     for (let i = 0; i < txnSysRes.length; i++) {
@@ -793,9 +793,9 @@ export default {
       // use pool to find the user
       let client = await models.pool.connect();
       let query = `SELECT * FROM users WHERE id = ${whereObj.id};`;
-      // console.log('query', query);
+      // // console.log('query', query);
       let result = await client.query(query);
-      // console.log('result', result.rows[0]);
+      // // console.log('result', result.rows[0]);
       client.release();
       return await user.findOne({
         where: whereObj,

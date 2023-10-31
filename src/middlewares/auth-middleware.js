@@ -13,9 +13,9 @@ import models from '../models';
 const authValidateRequest = async (req, res, next) => {
   try {
     if (req.headers && req.headers.authorization) {
-      // console.log("Auth ", req.headers);
+      // // console.log("Auth ", req.headers);
       const parts = req.headers.authorization.split(' ');
-      // console.log("Parts ", parts);
+      // // console.log("Parts ", parts);
       if (parts.length == 2) {
         const scheme = parts[0];
         const token = parts[1];
@@ -24,22 +24,22 @@ const authValidateRequest = async (req, res, next) => {
 
           const decodedToken = jwt.verifyToken(token);
           if (decodedToken) {
-            // console.log("Decoded Token ", decodedToken);
+            // // console.log("Decoded Token ", decodedToken);
             let user = await userRepository.findOne({ id: decodedToken.id });//Find user detail from token
-            // console.log("User ", user.id);
+            // // console.log("User ", user.id);
             if (user) {
-              // console.log("User ", user.id);
+              // // console.log("User ", user.id);
               const userToken = await accountRepository.getDeviceDetailByToken(token);
-              // console.log("User Token ", userToken);
+              // // console.log("User Token ", userToken);
               if (userToken) {
-                // console.log("User Token ", userToken);
+                // // console.log("User Token ", userToken);
                 if(req.headers.fund && req.headers.scheme){
-                  // console.log("Fund ", req.headers.fund);
-                  // console.log("Scheme ", req.headers.scheme);
+                  // // console.log("Fund ", req.headers.fund);
+                  // // console.log("Scheme ", req.headers.scheme);
 
                   user.fund = req.headers.fund;
                   user.scheme = req.headers.scheme;
-                  console.log("User ", user.id, user.fund, user.scheme);
+                  // console.log("User ", user.id, user.fund, user.scheme);
                 }
                 req.user = user;
                 req.userToken = userToken;

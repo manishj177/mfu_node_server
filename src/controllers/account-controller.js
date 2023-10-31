@@ -35,7 +35,7 @@ export default {
         });
       }
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       next(error);
     }
   },
@@ -71,7 +71,7 @@ export default {
 
   async getAuthorizationCode(req, res, next) {
     try {
-      console.log(232323);
+      // console.log(232323);
       let user = await attachmentRepository.getAuthorizationCode(req);
       res.status(HttpStatus.OK).json({
         success: true,
